@@ -1,15 +1,21 @@
-# Sử dụng Amazon Corretto (JDK 21) rất ổn định và nhẹ
-FROM amazoncorretto:21-al2023-headless
+# Stage 1: Build ứng dụng bằng Maven
+FROM maven:3.9.6-eclipse-temurin-21-as-builder
+WORKDIR /build
 
-# Bước 2: Tạo thư mục làm việc bên trong container
+# Copy file cấu hình Maven và mã nguồn
+COPY pom.xml .
+COPY src ./src
+
+# Thực hiện build dự án để tạo file JAR
+RUN mvn clean package -DskipTests
+
+# Stage 2: Tạo image chạy ứng dụng (gọn nhẹ)
+FROM amazoncorretto:21-al2023-headless
 WORKDIR /app
 
-# Bước 3: Copy file JAR đã build từ máy vào container
-# Lưu ý: Bạn cần chạy lệnh 'mvn clean package' trước để tạo file JAR này
-COPY target/*.jar app.jar
+# Copy file JAR từ Stage 1 sang Stage 2
+# Chú ý: Tên file JAR phải khớp với tên trong target/
+COPY --from=builder /build/target/*.jar app.jar
 
-# Bước 4: Mở cổng 8080 (cổng mặc định của Spring Boot)
 EXPOSE 8080
-
-# Bước 5: Lệnh để khởi chạy ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]
