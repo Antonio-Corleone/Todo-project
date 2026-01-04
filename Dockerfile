@@ -1,5 +1,5 @@
 # Stage 1: Build ứng dụng bằng Maven
-FROM maven:3.9.6-eclipse-temurin-21-as-builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /build
 
 # Copy file cấu hình Maven và mã nguồn
